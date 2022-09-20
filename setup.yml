@@ -30,14 +30,6 @@
         - net-tools
         - zsh
         - qemu-guest-agent
-        
-  - name: remove cloud
-    ignore_errors: yes # Sometimes prefers docker.io install?
-    become: yes
-    shell: |
-        echo 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg
-        apt -y purge cloud-init
-        rm -rf /etc/cloud/; sudo rm -rf /var/lib/cloud/
 
   - name: install docker
     ignore_errors: yes # Sometimes prefers docker.io install?
