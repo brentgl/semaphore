@@ -1,0 +1,89 @@
+---
+
+- name: run initial ubuntu setup
+  hosts: localhost
+  vars:
+    username: awest
+    zsh_theme: agnoster
+  tasks:
+
+  - name: ensure aptitude is installed
+    become: yes
+    command: apt-get -y install aptitude
+    args:
+        warn: false
+
+  - name: update the apt package index
+    become: yes
+    apt: update_cache=yes
+
+  - name: upgrade system packages
+    become: yes
+    apt: upgrade=yes
+
+  - name: install important packages
+    become: yes
+    apt: 
+        name: "{{ packages }}" 
+    vars:
+        packages:
+        - curl
+        - fonts-powerline
+        - git
+        - git-core
+        - golang
+        - neovim
+        - net-tools
+        - sl
+        - tmux
+        - zsh
+
+  - name: install sdkman
+    ignore_errors: yes # Ignore already installed errors
+    shell: |
+        curl -s "https://get.sdkman.io" | bash
+        source ~/.sdkman/bin/sdkman-init.sh
+
+  - name: install docker
+    ignore_errors: yes # Sometimes prefers docker.io install?
+    become: yes
+    shell: |
+        curl -sSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu$(lsb_release -cs)stable"
+        apt-get update
+        apt-get install docker-ce
+
+  - name: add {{ username }} to docker group
+    become: yes
+    shell: |
+        groupadd docker
+        gpasswd -a {{ username }} docker
+        newgrp docker
+
+  - name: write keyboard preferences to /etc/default/keyboard
+    become: yes
+    shell: echo 'XKBLAYOUT="us,us"\nXKBVARIANT="dvorak,"\nBACKSPACE="guess"\nXKBMODEL="pc105"\nXKBOPTIONS="grp_led:scroll"' > /etc/default/keyboard
+
+  - name: set up zsh
+    shell: |
+        sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+        sed -i -e  's/ZSH_THEME=".*"/ZSH_THEME="{{ zsh_theme }}/"' ~/.zshrc
+        chsh -s $(which zsh)
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting .oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+        git clone https://github.com/zsh-users/zsh-autosuggestions .oh-my-zsh/custom/plugins/zsh-autosuggestions
+        sed -i -e 's/plugins=\(((.*\n)*)\)/plugins=\($1\n  colored-man-pages\n  zsh-syntax-highlighting\n  zsh-autosuggestions\n/' ~/.zshrc
+
+  - name: copy over aliases
+    copy:
+        src: aliases
+        dest: ~/.zsh_aliases
+        owner: "{{ username }}"
+
+  - name: add loading of aliases to .zshrc
+    shell: cat 'if [ -f ~/.zsh_aliases ]; then\n\t. ~/.zsh_aliases/nfi' >> ~/.zshrc
+
+  - name: download latest version of java
+    shell: sdk install java
+
+  - name: download latest version of gradle
+    shell: sdk install gradle
