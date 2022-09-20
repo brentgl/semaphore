@@ -1,17 +1,14 @@
 ---
 
 - name: run initial ubuntu setup
-  hosts: localhost
+  hosts: servers
+  become: true
+  become_user: root
+  
   vars:
-    username: awest
+    username: brent
     zsh_theme: agnoster
   tasks:
-
-  - name: ensure aptitude is installed
-    become: yes
-    command: apt-get -y install aptitude
-    args:
-        warn: false
 
   - name: update the apt package index
     become: yes
@@ -30,39 +27,29 @@
         - curl
         - fonts-powerline
         - git
-        - git-core
-        - golang
-        - neovim
         - net-tools
-        - sl
-        - tmux
         - zsh
-
-  - name: install sdkman
-    ignore_errors: yes # Ignore already installed errors
+        - qemu-guest-agent
+        
+  - name: remove cloud
+    ignore_errors: yes # Sometimes prefers docker.io install?
+    become: yes
     shell: |
-        curl -s "https://get.sdkman.io" | bash
-        source ~/.sdkman/bin/sdkman-init.sh
+        echo 'datasource_list: [ None ]' | sudo -s tee /etc/cloud/cloud.cfg.d/90_dpkg.cfg
+        apt -y purge cloud-init
+        rm -rf /etc/cloud/; sudo rm -rf /var/lib/cloud/
 
   - name: install docker
     ignore_errors: yes # Sometimes prefers docker.io install?
     become: yes
     shell: |
-        curl -sSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu$(lsb_release -cs)stable"
-        apt-get update
-        apt-get install docker-ce
+        apt -y install docker.io
+        systemctl enable --now docker
 
   - name: add {{ username }} to docker group
     become: yes
     shell: |
-        groupadd docker
-        gpasswd -a {{ username }} docker
-        newgrp docker
-
-  - name: write keyboard preferences to /etc/default/keyboard
-    become: yes
-    shell: echo 'XKBLAYOUT="us,us"\nXKBVARIANT="dvorak,"\nBACKSPACE="guess"\nXKBMODEL="pc105"\nXKBOPTIONS="grp_led:scroll"' > /etc/default/keyboard
+        usermod -aG docker {{ username }}
 
   - name: set up zsh
     shell: |
@@ -82,8 +69,3 @@
   - name: add loading of aliases to .zshrc
     shell: cat 'if [ -f ~/.zsh_aliases ]; then\n\t. ~/.zsh_aliases/nfi' >> ~/.zshrc
 
-  - name: download latest version of java
-    shell: sdk install java
-
-  - name: download latest version of gradle
-    shell: sdk install gradle
