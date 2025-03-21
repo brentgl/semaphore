@@ -7,7 +7,7 @@
     vars:
       # you can provide default set of settings at top level
       # each of these settings can be overwritten on per user basis
-      omz_theme: fishy
+      omz_theme: agnoster
       omz_extra_conf:
       - export EDITOR=nano
       - export VISUAL=$EDITOR
