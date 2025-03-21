@@ -4,5 +4,5 @@
     - name: Change .zshrc theme
       ansible.builtin.replace:
         path: "{{ ansible_env.HOME }}/.zshrc"
-        regexp: 'ZSH_THEME=\"robbyrussell\"'
+        regexp: 'ZSH_THEME=\"fishy\"'
         replace: 'ZSH_THEME="agnoster"'
