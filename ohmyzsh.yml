@@ -1,43 +1,11 @@
----
-  - name: zsh and ohmyzsh
-    hosts: all
-    tasks:
-    - name: Install zsh
-      ansible.builtin.package:
-        name: zsh
-        state: present
-      become: true
-    - name: shell to zsh
-      ansible.builtin.user:
-        name: "{{ user }}"
-        shell: /bin/zsh
-      become: true
-    - name: Download ohmyzsh
-      ansible.builtin.get_url:
-        url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
-        dest: "/home/{{ user }}/install.sh"
-        mode: '0755'
-    - name: Install ohmyzsh
-      ansible.builtin.script:
-        cmd: "/home/{{ user }}/install.sh"
-    - name: Download NerdFonts
-      ansible.builtin.get_url:
-        url: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/Meslo.zip
-        dest: "/home/{{ user }}/Meslo.zip"
-    - name: Create temp directory
-      ansible.builtin.file:
-        path: "/home/{{ user }}/Meslo"
-        state: directory
-        mode: '0755'
-
-    - name: Install font files
-      ansible.builtin.unarchive:
-        src: "/home/{{ user }}/Meslo.zip"
-        dest: "/home/{{ user }}/Meslo"
-
-    - name: Move font files to fonts directory
-      ansible.builtin.copy:
-        src: "/home/{{ user }}/Meslo"
-        dest: /usr/share/fonts/Meslo
-        owner: root
-      become: true
+- name: Oh-my-zsh setup
+  hosts: all
+  roles:
+  - role: ohmyzsh
+    vars:
+      # you can provide default set of settings at top level
+      # each of these settings can be overwritten on per user basis
+      omz_theme: fishy
+      omz_extra_conf:
+      - export EDITOR=nano
+      - export VISUAL=$EDITOR
