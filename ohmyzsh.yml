@@ -1,5 +1,7 @@
 - name: Oh-my-zsh setup
   hosts: all
+  collections:
+    - den_is.tools
   roles:
   - role: ohmyzsh
     vars:
