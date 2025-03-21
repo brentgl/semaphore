@@ -1,6 +1,6 @@
 ---
   - name: zsh and ohmyzsh
-    hosts: 
+    hosts: all
     tasks:
     - name: Install zsh
       ansible.builtin.package:
