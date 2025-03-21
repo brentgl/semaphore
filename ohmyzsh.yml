@@ -7,7 +7,7 @@
         name: zsh
         state: present
       become: true
-    - name: Set user shell to zsh
+    - name: shell to zsh
       ansible.builtin.user:
         name: "{{ user }}"
         shell: /bin/zsh
