@@ -1,5 +1,5 @@
 ---
-- name: Playbook to Update cache, upgrade packages and reboot os if necessary
+- name: Playbook to Update cache, upgrade packages and reboot os
   hosts: all
   become: yes
   gather_facts: False
