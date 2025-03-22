@@ -3,8 +3,16 @@
   become: yes
   connection: ssh
   tasks:
+    - name: check if git is installed
+      package:
+        name: git
+        state: present
+      check_mode: true
+      register: git_check
     - name: Install git package
       apt:
         name: git
         state: present
-        update_cache: yes
+        update_cache: yes 
+        when: not git_check.changed 
+
